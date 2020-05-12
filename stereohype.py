@@ -3,11 +3,9 @@ import matplotlib.pyplot as plt
 import skimage, skimage.io
 
 
-def blank_image(shape=(600, 800, 4),
-               rgba=(255, 255, 255, 0)):
+def blank_image(shape=(600, 800, 4), rgba=(255, 255, 255, 0)):
     "Returns a blank image, of size defined by shape and background color rgb."
     return np.ones(shape, dtype=np.float) * np.array(rgba) / 255.
-
 
 
 def display(img, colorbar=False):
@@ -20,7 +18,7 @@ def display(img, colorbar=False):
     if colorbar:
         plt.colorbar(i, shrink=0.5, label='depth')
     plt.tight_layout()
-
+    plt.show()
 
 
 def insert_pattern(background_img, pattern, location):
@@ -95,15 +93,21 @@ def make_autostereogram(depthmap, pattern, shift_amplitude=0.1, invert=False):
 def main():
 
     plt.rcParams['figure.dpi'] = 150
+    file_tile ="coin-icon-2.png"
 
     # patterns
     img = blank_image()
-    display(img)
-    coin = skimage.io.imread('files/coin-icon.png')
-    display(coin)
+    #display(img)
+    coin = skimage.io.imread(file_tile)
+    print(coin.shape)
+    print(img.shape)
+    print("read coin image file")
+    #display(coin)
     test_img = insert_pattern(img, coin, (10, 20))
+    print("make test image")
     display(test_img)
     test_img = tile_horizontally(img, coin, (10, 20), 3, 128)
+    print("make multiple test image")
     display(test_img)
 
     img = blank_image(shape=(450, 800, 4))
@@ -134,3 +138,5 @@ def main():
     autostereogram = make_autostereogram(depthmap, pattern)
     display(autostereogram)
 
+if __name__ == "__main__":
+    main()
