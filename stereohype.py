@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import skimage, skimage.io
+import time
 
 
 def blank_image(shape=(600, 800, 4), rgba=(255, 255, 255, 0)):
@@ -41,8 +42,9 @@ def tile_horizontally(background_img, pattern, start_location, repetitions, shif
     return img
 
 
-def make_pattern(shape=(16, 16), levels=64):
+def make_pattern(shape=(16, 16), levels=64, seed=0):
     "Creates a pattern from gray values."
+    np.random.seed(seed)
     return np.random.randint(0, levels - 1, shape) / levels
 
 
@@ -86,11 +88,55 @@ def make_autostereogram(depthmap, pattern, shift_amplitude=0.1, invert=False):
     return autostereogram
 
 
+def generate_data(Nobj=1, verbose=False, invert=False):
+
+    # hyper params
+    width_pattern = 64
+    height_pattern = 128
+    radius_map = 20
+
+
+    # depth maps
+    print("Generating depth map-based autostereograms")
+
+
+    t0 = time.time()
+    for iobj in range(Nobj):
+
+        # Generate Pattern
+        pattern = make_pattern(shape=(height_pattern, width_pattern))
+        if verbose:
+            display(pattern)
+
+        # create depth map
+        depthmap = create_circular_depthmap(radius=radius_map)
+
+        if verbose:
+            display(depthmap, colorbar=True)
+
+        # normalize
+        depthmap = normalize(depthmap)
+
+        # generate stereogram
+        autostereogram = make_autostereogram(depthmap, pattern, invert=invert)
+
+        if verbose:
+            display(autostereogram)
+
+
+    t1 = time.time()
+
+    dt = t1-t0
+    tavg = dt/float(Nobj)
+    print("average time per object", tavg)
 
 
 
 
-def main():
+
+def test():
+
+    print("running out of the box test")
 
     plt.rcParams['figure.dpi'] = 150
     file_tile ="coin-icon-2.png"
@@ -137,6 +183,11 @@ def main():
     display(depthmap, colorbar=True)
     autostereogram = make_autostereogram(depthmap, pattern)
     display(autostereogram)
+
+
+def main():
+    generate_data(Nobj=1, verbose=False, invert=False)
+
 
 if __name__ == "__main__":
     main()
