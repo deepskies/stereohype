@@ -130,3 +130,6 @@ dmypy.json
 
 # PyCharm generated folder
 .idea/
+
+# data
+*.npy
