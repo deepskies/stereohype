@@ -123,6 +123,7 @@ def generate_data(Nobj=1, verbose=False, invert=False, save=False):
     image = np.zeros((width_image, height_image, Nobj), pattern.dtype)
     depth = np.zeros((width_image, height_image, Nobj), pattern.dtype)
 
+    center_depth = [256, 270]
 
     t0 = time.time()
     for iobj in range(Nobj):
@@ -132,7 +133,7 @@ def generate_data(Nobj=1, verbose=False, invert=False, save=False):
         radius = 200
 
         # create depth map
-        depthmap = create_circular_depthmap(shape_depth, radius=radius)
+        depthmap = create_circular_depthmap(shape_depth, center=center_depth, radius=radius)
 
         if verbose:
             display(depthmap, colorbar=True)
@@ -146,6 +147,7 @@ def generate_data(Nobj=1, verbose=False, invert=False, save=False):
         if verbose:
             display(autostereogram)
 
+        # add to array fo rsaving later.
         image[:, :, iobj] = autostereogram
         depth[:, :, iobj] = depthmap
 
@@ -154,6 +156,8 @@ def generate_data(Nobj=1, verbose=False, invert=False, save=False):
         np.save(file_depth, depth)
 
     t1 = time.time()
+
+    display(image[:,:,0])
 
     dt = t1-t0
     tavg = dt/float(Nobj)
@@ -214,7 +218,7 @@ def test():
 
 
 def main():
-    generate_data(Nobj=1, verbose=False, invert=False, save=False
+    generate_data(Nobj=1, verbose=False, invert=False, save=False)
 
 
 if __name__ == "__main__":
