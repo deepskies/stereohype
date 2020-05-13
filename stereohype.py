@@ -89,20 +89,21 @@ def make_autostereogram(shape, depthmap, pattern, shift_amplitude=0.1, invert=Fa
 
 
 
-def generate_data(Nobj=1, verbose=False, invert=False, save=False):
-
-    version = 000
+def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=False):
 
     # hyper params
+    version = 000
+
+    # shape parameters
     width_image = 512
     height_image = width_image
     shape_image = (width_image, height_image)
     shape_depth = shape_image
-
     width_pattern = 64
     height_pattern = 512
     radius_min = 50
     radius_max = 200
+    center_depth = [256, 270]
 
     version_str = str(version)
     width_image_str = str(width_image)
@@ -123,14 +124,15 @@ def generate_data(Nobj=1, verbose=False, invert=False, save=False):
     image = np.zeros((width_image, height_image, Nobj), pattern.dtype)
     depth = np.zeros((width_image, height_image, Nobj), pattern.dtype)
 
-    center_depth = [256, 270]
 
     t0 = time.time()
     for iobj in range(Nobj):
 
         # select radius
-        radius = np.random.uniform(radius_min, radius_max)
-        radius = 200
+        if radius_random:
+            radius = np.random.uniform(radius_min, radius_max)
+        else:
+            radius = 100
 
         # create depth map
         depthmap = create_circular_depthmap(shape_depth, center=center_depth, radius=radius)
@@ -218,7 +220,7 @@ def test():
 
 
 def main():
-    generate_data(Nobj=1, verbose=False, invert=False, save=False)
+    generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=False)
 
 
 if __name__ == "__main__":
