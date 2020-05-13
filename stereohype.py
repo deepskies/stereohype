@@ -89,7 +89,7 @@ def make_autostereogram(shape, depthmap, pattern, shift_amplitude=0.1, invert=Fa
 
 
 
-def generate_data(Nobj=1, verbose=False, invert=False):
+def generate_data(Nobj=1, verbose=False, invert=False, save=False):
 
     version = 000
 
@@ -108,19 +108,20 @@ def generate_data(Nobj=1, verbose=False, invert=False):
     width_image_str = str(width_image)
     width_pattern_str = str(width_pattern)
 
-    file_output = "data_v" + version_str + "_radius_vary_" + width_image_str + "_" + width_pattern_str + ".npy"
-    print(file_output)
+    file_image = "data_v" + version_str + "_circle_radius_" + width_image_str + "_" + width_pattern_str + "_image.npy"
+    file_depth = "data_v" + version_str + "_circle_radius_" + width_image_str + "_" + width_pattern_str + "_depth.npy"
+    print(file_image)
+    print(file_depth)
 
     # Generate Pattern
     pattern = make_pattern(shape=(height_pattern, width_pattern))
     if verbose:
         display(pattern)
 
-
     # depth maps
     print("Generating depth map-based autostereograms")
-
-    output = np.zeros((width_image, height_image, Nobj), pattern.dtype)
+    image = np.zeros((width_image, height_image, Nobj), pattern.dtype)
+    depth = np.zeros((width_image, height_image, Nobj), pattern.dtype)
 
 
     t0 = time.time()
@@ -145,12 +146,14 @@ def generate_data(Nobj=1, verbose=False, invert=False):
         if verbose:
             display(autostereogram)
 
-        output[:, :, iobj] = autostereogram
+        image[:, :, iobj] = autostereogram
+        depth[:, :, iobj] = depthmap
 
+    if save:
+        np.save(file_image, image)
+        np.save(file_depth, depth)
 
     t1 = time.time()
-    #display(autostereogram)
-    display(output[:,:,0])
 
     dt = t1-t0
     tavg = dt/float(Nobj)
@@ -211,7 +214,7 @@ def test():
 
 
 def main():
-    generate_data(Nobj=1, verbose=False, invert=False)
+    generate_data(Nobj=1, verbose=False, invert=False, save=False
 
 
 if __name__ == "__main__":
