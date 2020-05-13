@@ -48,7 +48,7 @@ def make_pattern(shape=(16, 16), levels=64, seed=0):
     return np.random.randint(0, levels - 1, shape) / levels
 
 
-def create_circular_depthmap(shape=(600, 800), center=None, radius=100):
+def create_circular_depthmap(shape, center=None, radius=100):
     "Creates a circular depthmap, centered on the image."
     depthmap = np.zeros(shape, dtype=np.float)
     r = np.arange(depthmap.shape[0])
@@ -72,12 +72,12 @@ def normalize(depthmap):
 
 
 
-def make_autostereogram(depthmap, pattern, shift_amplitude=0.1, invert=False):
+def make_autostereogram(shape, depthmap, pattern, shift_amplitude=0.1, invert=False):
     "Creates an autostereogram from depthmap and pattern."
     depthmap = normalize(depthmap)
     if invert:
         depthmap = 1 - depthmap
-    autostereogram = np.zeros_like(depthmap, dtype=pattern.dtype)
+    autostereogram = np.zeros(shape, dtype=pattern.dtype)
     for r in np.arange(autostereogram.shape[0]):
         for c in np.arange(autostereogram.shape[1]):
             if c < pattern.shape[1]:
@@ -88,28 +88,50 @@ def make_autostereogram(depthmap, pattern, shift_amplitude=0.1, invert=False):
     return autostereogram
 
 
+
 def generate_data(Nobj=1, verbose=False, invert=False):
 
+    version = 000
+
     # hyper params
+    width_image = 512
+    height_image = width_image
+    shape_image = (width_image, height_image)
+    shape_depth = shape_image
+
     width_pattern = 64
-    height_pattern = 128
-    radius_map = 20
+    height_pattern = 512
+    radius_min = 50
+    radius_max = 200
+
+    version_str = str(version)
+    width_image_str = str(width_image)
+    width_pattern_str = str(width_pattern)
+
+    file_output = "data_v" + version_str + "_radius_vary_" + width_image_str + "_" + width_pattern_str + ".npy"
+    print(file_output)
+
+    # Generate Pattern
+    pattern = make_pattern(shape=(height_pattern, width_pattern))
+    if verbose:
+        display(pattern)
 
 
     # depth maps
     print("Generating depth map-based autostereograms")
 
+    output = np.zeros((width_image, height_image, Nobj), pattern.dtype)
+
 
     t0 = time.time()
     for iobj in range(Nobj):
 
-        # Generate Pattern
-        pattern = make_pattern(shape=(height_pattern, width_pattern))
-        if verbose:
-            display(pattern)
+        # select radius
+        radius = np.random.uniform(radius_min, radius_max)
+        radius = 200
 
         # create depth map
-        depthmap = create_circular_depthmap(radius=radius_map)
+        depthmap = create_circular_depthmap(shape_depth, radius=radius)
 
         if verbose:
             display(depthmap, colorbar=True)
@@ -118,13 +140,17 @@ def generate_data(Nobj=1, verbose=False, invert=False):
         depthmap = normalize(depthmap)
 
         # generate stereogram
-        autostereogram = make_autostereogram(depthmap, pattern, invert=invert)
+        autostereogram = make_autostereogram(shape_image, depthmap, pattern, invert=invert)
 
         if verbose:
             display(autostereogram)
 
+        output[:, :, iobj] = autostereogram
+
 
     t1 = time.time()
+    #display(autostereogram)
+    display(output[:,:,0])
 
     dt = t1-t0
     tavg = dt/float(Nobj)
@@ -173,7 +199,6 @@ def test():
 
     autostereogram = make_autostereogram(depthmap, pattern, invert=True)
     display(autostereogram)
-
 
 
     depthmap = create_circular_depthmap(center=(200, 300), radius=100) + \
