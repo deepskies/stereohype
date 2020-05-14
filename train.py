@@ -13,7 +13,7 @@ def main():
     os.makedirs(model_dir, exist_ok=True)
     width = 512
     in_data = np.load(f'data_v0_circle_radius_{width}_64_image.npy')
-    out_data = np.load(f'data_v0_circle_radius_{width}_64_image.npy')
+    out_data = np.load(f'data_v0_circle_radius_{width}_64_depth.npy')
     if in_data.shape[1] == 1:
         in_data = np.transpose(in_data, (0, 2, 3, 1))
         out_data = np.transpose(out_data, (0, 2, 3, 1))
@@ -25,7 +25,7 @@ def main():
     in_val = in_data[n_train:]
     out_val = out_data[n_train:]
 
-    nn = UNet(1, 1, width, features=[32, [64, 2], 64, [128, 2], 128, [256, 2], 256], multitasklength=0)
+    nn = UNet(1, 1, width, features=[32, [64, 2], 64], multitasklength=0)
 
     nn.nnet.compile(loss='mean_squared_error', optimizer=tfk.optimizers.Adam(lr=0.01))
     nn.nnet.summary()
