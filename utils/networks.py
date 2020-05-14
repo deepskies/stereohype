@@ -29,7 +29,7 @@ class UNet(object):
         print('Dropout level: ', dropout)
 
         # Define the Net Architecture
-        input_img = tfkl.Input(shape=(inchannel, npix, npix))
+        input_img = tfkl.Input(shape=(npix, npix, inchannel))
         x = input_img
         if skipconn:
             skips = []
@@ -79,21 +79,21 @@ class UNet(object):
                 filtersizehere = filtersize
 
             x = tfkl.Conv2D(depth, (filtersizehere, filtersizehere), activation=actfn, padding="same",
-                            strides=(strid, strid), data_format="channels_first", kernel_initializer=initialiser,
+                            strides=(strid, strid), kernel_initializer=initialiser,
                             kernel_regularizer=tfk.regularizers.l1(l1reg), use_bias=bias)(x)
             if pool_here:
-                x = tfkl.MaxPool2D(pool_here, padding='same', data_format='channels_first')(x)
+                x = tfkl.MaxPool2D(pool_here, padding='same')(x)
 
             # if image size changed, record it.
-            if tfk.backend.int_shape(x)[-1] != imagesizes[-1]:
-                imagesizes.append(tfk.backend.int_shape(x)[-1])
+            if tfk.backend.int_shape(x)[-2] != imagesizes[-1]:
+                imagesizes.append(tfk.backend.int_shape(x)[-2])
 
             # if there have been 2 layers since last res connection,
             # make it, reset the counter, and save state for next one
             if resnets and count == 2:
-                if laststr != 1 or tfk.backend.int_shape(addlater)[-3] != depth:
+                if laststr != 1 or tfk.backend.int_shape(addlater)[-1] != depth:
                     addlater = tfkl.Conv2D(depth, (filtersizehere, filtersizehere), activation=None, padding='same',
-                                           strides=(laststr, laststr), data_format="channels_first",
+                                           strides=(laststr, laststr),
                                            kernel_initializer=initialiser,
                                            kernel_regularizer=tfk.regularizers.l1(l1reg),
                                            use_bias=bias)(addlater)
@@ -103,7 +103,7 @@ class UNet(object):
                 addlater = x
 
             if bn:
-                x = tfkl.BatchNormalization(axis=1)(x)
+                x = tfkl.BatchNormalization(axis=3)(x)
 
         encoded = x
         print("shape of encoded", tfk.backend.int_shape(encoded))
@@ -150,16 +150,16 @@ class UNet(object):
                 filtersizehere = filtersize
 
             if pool_here:
-                x = tfkl.UpSampling2D(pool_here, data_format='channels_first')(x)
+                x = tfkl.UpSampling2D(pool_here)(x)
 
             x = tfkl.Conv2DTranspose(depth, (filtersizehere, filtersizehere), activation=actfn, padding="same",
-                                     strides=(strid, strid), data_format="channels_first",
+                                     strides=(strid, strid),
                                      kernel_initializer=initialiser,
                                      kernel_regularizer=tfk.regularizers.l1(l1reg), use_bias=bias)(x)
 
             if strid != 1 and crops[k]:  # if we need to crop after up stride, do it
                 crop = crops[k]
-                x = tfkl.Cropping2D(((0, crop), (0, crop)), data_format='channels_first')(x)
+                x = tfkl.Cropping2D(((0, crop), (0, crop)))(x)
 
             if resnets and count == 2:
                 shape1 = tfk.backend.int_shape(addlater)
@@ -167,12 +167,12 @@ class UNet(object):
                 if shape1 != shape2:
                     addlater = tfkl.Conv2DTranspose(depth, (filtersizehere, filtersizehere), activation=None,
                                                     padding='same', strides=(laststr, laststr),
-                                                    data_format="channels_first", kernel_initializer=initialiser,
+                                                    kernel_initializer=initialiser,
                                                     kernel_regularizer=tfk.regularizers.l1(l1reg),
                                                     use_bias=bias)(addlater)
                     if crops[k]:
                         crop = crops[k]
-                        addlater = tfkl.Cropping2D(((0, crop), (0, crop)), data_format='channels_first')(addlater)
+                        addlater = tfkl.Cropping2D(((0, crop), (0, crop)))(addlater)
                 x = tfkl.Add()([addlater, x])
                 count = 0
                 addlater = x
@@ -182,10 +182,10 @@ class UNet(object):
                 addlatermt = x
 
             if bn:
-                x = tfkl.BatchNormalization(axis=1)(x)
+                x = tfkl.BatchNormalization(axis=3)(x)
 
             if skiphere:
-                x = tfkl.Concatenate(axis=1)([x, skipper])
+                x = tfkl.Concatenate(axis=3)([x, skipper])
 
         decoded = []
         try:
@@ -207,7 +207,7 @@ class UNet(object):
                     count += 1
 
                 y = tfkl.Conv2D(depth, (filtersize, filtersize), activation=actfn, padding="same",
-                                data_format="channels_first", kernel_initializer=initialiser,
+                                kernel_initializer=initialiser,
                                 kernel_regularizer=tfk.regularizers.l1(l1reg), use_bias=bias)(y)
 
                 if resnets and count == 2:
@@ -216,11 +216,11 @@ class UNet(object):
                     addlater = y
 
                 if bn:
-                    y = tfkl.BatchNormalization(axis=1)(y)
+                    y = tfkl.BatchNormalization(axis=3)(y)
                 if dropout > 0:
                     y = tfkl.Dropout(dropout)(y)
 
-            y = tfkl.Conv2D(1, (filtersize, filtersize), activation=None, padding="same", data_format="channels_first",
+            y = tfkl.Conv2D(1, (filtersize, filtersize), activation=None, padding="same",
                             kernel_initializer=initialiser, kernel_regularizer=tfk.regularizers.l1(l1reg),
                             use_bias=bias)(y)
             decoded.append(y)

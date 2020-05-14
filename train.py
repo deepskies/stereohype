@@ -1,6 +1,7 @@
 from utils.networks import UNet
 import tensorflow as tf
 import numpy as np
+import os
 
 tfk = tf.keras
 tfkc = tfk.callbacks
@@ -9,8 +10,13 @@ tfkc = tfk.callbacks
 def main():
     batch_size = 8
     model_dir = 'unet/'
-    in_data = np.load('data_v0_circle_radius_512_64_image.npy')
-    out_data = np.load('data_v0_circle_radius_512_64_image.npy')
+    os.makedirs(model_dir, exist_ok=True)
+    width = 512
+    in_data = np.load(f'data_v0_circle_radius_{width}_64_image.npy')
+    out_data = np.load(f'data_v0_circle_radius_{width}_64_image.npy')
+    if in_data.shape[1] == 1:
+        in_data = np.transpose(in_data, (0, 2, 3, 1))
+        out_data = np.transpose(out_data, (0, 2, 3, 1))
     n = len(in_data)
     n_train = int(0.9*n)
     n_val = int(0.1*n)
@@ -19,7 +25,7 @@ def main():
     in_val = in_data[n_train:]
     out_val = out_data[n_train:]
 
-    nn = UNet(1, 1, features=[32, [64, 2], 64, [128, 2], 128, [256, 2], 256], multitasklength=0)
+    nn = UNet(1, 1, width, features=[32, [64, 2], 64, [128, 2], 128, [256, 2], 256], multitasklength=0)
 
     nn.nnet.compile(loss='mean_squared_error', optimizer=tfk.optimizers.Adam(lr=0.01))
     nn.nnet.summary()

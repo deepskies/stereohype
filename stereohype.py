@@ -121,8 +121,8 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
 
     # depth maps
     print("Generating depth map-based autostereograms")
-    image = np.zeros((Nobj, 1, width_image, height_image), pattern.dtype)
-    depth = np.zeros((Nobj, 1, width_image, height_image), pattern.dtype)
+    image = np.zeros((Nobj, width_image, height_image, 1), pattern.dtype)
+    depth = np.zeros((Nobj, width_image, height_image, 1), pattern.dtype)
 
 
     t0 = time.time()
@@ -150,8 +150,8 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
             display(autostereogram)
 
         # add to array for saving later.
-        image[iobj, 0, :, :] = autostereogram
-        depth[iobj, 0, :, :] = depthmap
+        image[iobj, :, :, 0] = autostereogram
+        depth[iobj, :, :, 0] = depthmap
 
     if save:
         np.save(file_image, image)
@@ -220,7 +220,7 @@ def test():
 
 
 def main():
-    generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=False)
+    generate_data(Nobj=1000, radius_random=True, verbose=False, invert=False, save=True)
 
 
 if __name__ == "__main__":
