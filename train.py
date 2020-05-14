@@ -1,5 +1,6 @@
 from utils.networks import UNet
 import tensorflow as tf
+import numpy as np
 
 tfk = tf.keras
 tfkc = tfk.callbacks
@@ -8,6 +9,15 @@ tfkc = tfk.callbacks
 def main():
     batch_size = 8
     model_dir = 'unet/'
+    in_data = np.load('data_v0_circle_radius_512_64_image.npy')
+    out_data = np.load('data_v0_circle_radius_512_64_image.npy')
+    n = len(in_data)
+    n_train = int(0.9*n)
+    n_val = int(0.1*n)
+    in_train = in_data[:n_train]
+    out_train = out_data[:n_train]
+    in_val = in_data[n_train:]
+    out_val = out_data[n_train:]
 
     nn = UNet(1, 1, features=[32, [64, 2], 64, [128, 2], 128, [256, 2], 256], multitasklength=0)
 
