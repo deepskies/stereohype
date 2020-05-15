@@ -121,8 +121,8 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
 
     # depth maps
     print("Generating depth map-based autostereograms")
-    image = np.zeros((width_image, height_image, Nobj), pattern.dtype)
-    depth = np.zeros((width_image, height_image, Nobj), pattern.dtype)
+    image = np.zeros((Nobj, width_image, height_image, 1), pattern.dtype)
+    depth = np.zeros((Nobj, width_image, height_image, 1), pattern.dtype)
 
 
     t0 = time.time()
@@ -149,9 +149,9 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
         if verbose:
             display(autostereogram)
 
-        # add to array fo rsaving later.
-        image[:, :, iobj] = autostereogram
-        depth[:, :, iobj] = depthmap
+        # add to array for saving later.
+        image[iobj, :, :, 0] = autostereogram
+        depth[iobj, :, :, 0] = depthmap
 
     if save:
         np.save(file_image, image)
@@ -159,7 +159,7 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
 
     t1 = time.time()
 
-    display(image[:,:,0])
+    display(image[0, :, :, 0])
 
     dt = t1-t0
     tavg = dt/float(Nobj)
@@ -220,7 +220,7 @@ def test():
 
 
 def main():
-    generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=False)
+    generate_data(Nobj=1000, radius_random=True, verbose=False, invert=False, save=True)
 
 
 if __name__ == "__main__":
