@@ -166,7 +166,7 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
     print("average time per object", tavg)
 
 
-
+    return image, depth
 
 
 def test():

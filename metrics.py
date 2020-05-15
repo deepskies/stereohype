@@ -224,6 +224,14 @@ def make_autostereogram(shape, depthmap, pattern, shift_amplitude=0.1, invert=Fa
 
 
 
+
+def test_metrics():
+
+
+
+    plot_map_difference(map_predict, map_true, fft=False, residual=False, percentage=False, save=False)
+
+
 def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=False):
 
     # hyper params
@@ -299,6 +307,8 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
     dt = t1-t0
     tavg = dt/float(Nobj)
     print("average time per object", tavg)
+
+    return image, depth
 
 
 
