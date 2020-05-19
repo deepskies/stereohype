@@ -156,14 +156,15 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
 
     t1 = time.time()
 
-    display(image[0, :, :, 0])
+    if verbose:
+        display(image[0, :, :, 0])
 
     dt = t1-t0
     tavg = dt/float(Nobj)
     print("average time per object", tavg)
 
 
-
+    return image, depth
 
 
 def test():
