@@ -91,19 +91,21 @@ def plot_map_difference(map_predict, map_true, fft=False, residual=False, percen
             map_difference *= 100.
 
     # plot images
-    fig = plt.figure(figsize=(3*map_true.shape[0] + 30, map_true.shape[1]))
+    print(map_true.shape[0])
+    print(map_true.shape[1])
 
-    fig.add_suplot(0, 0, 0)
+    #plt.figure(figsize=(map_true.shape[0] , map_true.shape[1]))
+    plt.figure()
+
+    plt.subplot(131)
     plt.imshow(map_true)
 
-    fig.add_subplot(0, 1, 0)
-    plt.imshow(map_predicted)
+    plt.subplot(132)
+    plt.imshow(map_predict)
 
-    fig.add_subplot(0, 2, 0)
+    plt.subplot(133)
     plt.imshow(map_difference)
 
-    if colorbar:
-        plt.colorbar(map_difference)
 
 
     plt.tight_layout()
@@ -112,6 +114,23 @@ def plot_map_difference(map_predict, map_true, fft=False, residual=False, percen
         plt.savefig(file_fig)
 
 
+def read_history(filename, metric_name="loss"):
+    '''
+    open files for metric history
+
+    inputs
+        filename
+
+    outputs
+        metrics
+    '''
+
+    data = pd.read_csv('data.csv')
+    if metric_name is "loss":
+        output =  data['loss'], data['valid_loss']
+    elif metric_name is "accuracy":
+        output = data['acc'], data['valid_acc']
+    return output
 
 
 def plot_history(epochs, metric_train, metric_name, metric_valid=None, save=False, figsize=(10,10)):
@@ -137,4 +156,12 @@ def plot_history(epochs, metric_train, metric_name, metric_valid=None, save=Fals
     plt.show()
     if save:
         plt.savefig(file_fig)
+
+def read_images():
+    model_dir = 'unet/'
+    os.makedirs(model_dir, exist_ok=True)
+    width = 512
+    in_data = np.load(f'data_v0_circle_radius_{width}_64_image.npy')
+    out_data = np.load(f'data_v0_circle_radius_{width}_64_depth.npy')
+
 
