@@ -118,6 +118,9 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
     image = np.zeros((Nobj, width_image, height_image, 1))
     depth = np.zeros((Nobj, width_image, height_image, 1))
 
+    image = np.zeros((Nobj, width_image, height_image, 1))
+    depth = np.zeros((Nobj, width_image, height_image, 1))
+
     t0 = time.time()
     for iobj in range(Nobj):
         # Generate Pattern
@@ -218,7 +221,7 @@ def test():
 
 
 def main():
-    generate_data(Nobj=1000, radius_random=True, verbose=False, invert=False, save=True)
+    generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=True)
 
 
 if __name__ == "__main__":
