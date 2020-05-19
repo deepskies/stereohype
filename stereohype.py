@@ -42,10 +42,9 @@ def tile_horizontally(background_img, pattern, start_location, repetitions, shif
     return img
 
 
-def make_pattern(shape=(16, 16), levels=64, seed=0):
+def make_pattern(shape=(16, 16), levels=64):
     "Creates a pattern from gray values."
-    np.random.seed(seed)
-    return np.random.randint(0, levels - 1, shape) / levels
+    return np.random.randint(0, levels, shape) / levels
 
 
 def create_circular_depthmap(shape, center=None, radius=100):
@@ -114,19 +113,15 @@ def generate_data(Nobj=1, radius_random=True, verbose=False, invert=False, save=
     print(file_image)
     print(file_depth)
 
-    # Generate Pattern
-    pattern = make_pattern(shape=(height_pattern, width_pattern))
-    if verbose:
-        display(pattern)
-
     # depth maps
     print("Generating depth map-based autostereograms")
-    image = np.zeros((Nobj, width_image, height_image), pattern.dtype)
-    depth = np.zeros((Nobj, width_image, height_image), pattern.dtype)
-
 
     t0 = time.time()
     for iobj in range(Nobj):
+        # Generate Pattern
+        pattern = make_pattern(shape=(height_pattern, width_pattern))
+        if verbose:
+            display(pattern)
 
         # select radius
         if radius_random:
