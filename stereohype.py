@@ -87,7 +87,7 @@ def make_autostereogram(shape, depthmap, pattern, shift_amplitude=0.1, invert=Fa
     c = np.arange(w)
     pos = c - w_pattern + shift
 
-    for c in np.arange(w_pattern, autostereogram.shape[2]):
+    for c in np.arange(w_pattern, w):
         autostereogram[:, :, c] = autostereogram[grid[0], grid[1], pos[:, :, c]]
     return autostereogram
 
@@ -217,7 +217,7 @@ def test():
 
 
 def main():
-    generate_data(n_obj=100, radius_random=True, verbose=False, invert=False, save=True)
+    generate_data(n_obj=1, radius_random=True, verbose=False, invert=False, save=True)
 
 
 if __name__ == "__main__":
