@@ -49,16 +49,17 @@ def make_pattern(shape=(16, 16), levels=64):
 
 def create_circular_depthmap(shape, center=None, radius=None):
     "Creates a circular depthmap, centered on the image."
-    depthmap = np.zeros((shape[1], shape[2], shape[0]), dtype=np.float)
-    r = np.arange(shape[1])
-    c = np.arange(shape[2])
+    n, h, w = shape
+    depthmap = np.zeros((h, w, n), dtype=np.float)
+    r = np.arange(h)
+    c = np.arange(w)
     r, c = np.meshgrid(r, c, indexing='ij')
-    r = np.repeat(r[:, :, np.newaxis], shape[0], axis=2)
-    c = np.repeat(c[:, :, np.newaxis], shape[0], axis=2)
+    r = np.repeat(r[:, :, np.newaxis], n, axis=2)
+    c = np.repeat(c[:, :, np.newaxis], n, axis=2)
     if center is None:
-        center = np.array([(shape[1]-1) / 2, (shape[2]-1) / 2])*np.ones((shape[0], 2))
+        center = np.array([(h-1) / 2, (w-1) / 2])*np.ones((n, 2))
     if radius is None:
-        radius = 100*np.ones(shape[0])
+        radius = 100*np.ones(n)
     d = np.sqrt((r - center[:, 0])**2 + (c - center[:, 1])**2)
     depthmap += (d < radius)
     depthmap = np.transpose(depthmap, (2, 0, 1))
@@ -220,7 +221,7 @@ def test():
 
 
 def main():
-    generate_data(n_obj=100, radius_random=True, verbose=False, invert=False, save=True)
+    generate_data(n_obj=1, radius_random=True, verbose=False, invert=False, save=True)
 
 
 if __name__ == "__main__":
