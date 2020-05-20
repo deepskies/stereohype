@@ -50,7 +50,7 @@ def make_pattern(shape=(16, 16), levels=64):
 def create_circular_depthmap(shape, center=None, radius=None):
     "Creates a circular depthmap, centered on the image."
     n, h, w = shape
-    depthmap = np.zeros((h, w, n), dtype=np.float)
+
     r = np.arange(h)
     c = np.arange(w)
     r, c = np.meshgrid(r, c, indexing='ij')
@@ -61,7 +61,7 @@ def create_circular_depthmap(shape, center=None, radius=None):
     if radius is None:
         radius = 100*np.ones(n)
     d = np.sqrt((r - center[:, 0])**2 + (c - center[:, 1])**2)
-    depthmap += (d < radius)
+    depthmap = (d < radius).astype(float)
     depthmap = np.transpose(depthmap, (2, 0, 1))
     return depthmap
 
