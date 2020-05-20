@@ -76,17 +76,19 @@ def normalize(depthmap):
 
 def make_autostereogram(shape, depthmap, pattern, shift_amplitude=0.1, invert=False):
     "Creates an autostereogram from depthmap and pattern."
-    depthmap = normalize(depthmap)
     if invert:
         depthmap = 1 - depthmap
+    n, h, w = shape
     autostereogram = np.zeros(shape, dtype=pattern.dtype)
-    for r in np.arange(autostereogram.shape[0]):
-        for c in np.arange(autostereogram.shape[1]):
-            if c < pattern.shape[1]:
-                autostereogram[r, c] = pattern[r % pattern.shape[0], c]
-            else:
-                shift = int(depthmap[r, c] * shift_amplitude * pattern.shape[1])
-                autostereogram[r, c] = autostereogram[r, c - pattern.shape[1] + shift]
+    w_pattern = pattern.shape[2]
+    shift = (depthmap * shift_amplitude * w_pattern).astype(int)
+    autostereogram[:, :, :w_pattern] = pattern
+    grid = np.indices((n, h))
+    c = np.arange(w)
+    pos = c - w_pattern + shift
+
+    for c in np.arange(w_pattern, autostereogram.shape[2]):
+        autostereogram[:, :, c] = autostereogram[grid[0], grid[1], pos[:, :, c]]
     return autostereogram
 
 
@@ -98,10 +100,11 @@ def generate_data(n_obj=1, radius_random=True, verbose=False, invert=False, save
     # shape parameters
     width_image = 512
     height_image = width_image
-    shape_image = (width_image, height_image)
+    shape_image = (n_obj, height_image, width_image)
     shape_depth = shape_image
     width_pattern = 64
-    height_pattern = 512
+    height_pattern = height_image
+    shape_pattern = (n_obj, height_pattern, width_pattern)
     radius_min = 50
     radius_max = 200
     center_depth = [256, 270]
@@ -123,7 +126,7 @@ def generate_data(n_obj=1, radius_random=True, verbose=False, invert=False, save
     t0 = time.time()
 
     # Generate Pattern
-    pattern = make_pattern(shape=(n_obj, height_pattern, width_pattern))
+    pattern = make_pattern(shape=shape_pattern)
     if verbose:
         display(pattern[0])
 
@@ -134,34 +137,27 @@ def generate_data(n_obj=1, radius_random=True, verbose=False, invert=False, save
         radius = 100*np.ones(n_obj)
 
     # create depth map
-    depth = create_circular_depthmap((n_obj, height_image, width_image), center=center_depth, radius=radius)
+    depth = create_circular_depthmap(shape_depth, center=center_depth, radius=radius)
 
     if verbose:
-        display(depth[0, :, :], colorbar=True)
+        display(depth[0], colorbar=True)
 
     # normalize
     depth = normalize(depth)
 
-    for iobj in range(n_obj):
-        # generate stereogram
-        autostereogram = make_autostereogram(shape_image, depth[iobj], pattern[iobj], invert=invert)
+    image = make_autostereogram(shape_image, depth, pattern, invert=invert)
 
-        if verbose:
-            display(autostereogram)
+    if verbose:
+        display(image[0])
 
-        # add to array for saving later.
-        image[iobj, :, :, 0] = autostereogram
-
-    depth = np.reshape(depth, depth.shape + (1,))
+    depth = np.reshape(depth, shape_depth + (1,))
+    image = np.reshape(image, shape_image + (1,))
 
     if save:
         np.save(file_image, image)
         np.save(file_depth, depth)
 
     t1 = time.time()
-
-    if verbose:
-        display(image[0, :, :, 0])
 
     dt = t1-t0
     tavg = dt/float(n_obj)
@@ -221,7 +217,7 @@ def test():
 
 
 def main():
-    generate_data(n_obj=1, radius_random=True, verbose=False, invert=False, save=True)
+    generate_data(n_obj=100, radius_random=True, verbose=False, invert=False, save=True)
 
 
 if __name__ == "__main__":
